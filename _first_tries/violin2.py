@@ -14,25 +14,39 @@ themen_raw = [
     'Diff_Nachrichtentechnik', 'Diff_Computer', 'Diff_Fliegen'
 ]
 
-# Kürzere Namen ohne "Diff_"
-themen_kurz = [t.replace("Diff_", "") for t in themen_raw]
-umbenennung = dict(zip(themen_raw, themen_kurz))
+# Explizite Umbenennung (bes. für "die Welt")
+umbenennung = {col: col.replace("Diff_", "") for col in themen_raw}
+umbenennung["Diff_dieWelt"] = "die Welt"  # explizit Leerzeichen statt "dieWelt"
 df = df.rename(columns=umbenennung)
 
-# Geschlecht umwandeln (z. B. 1 = ♂, 2 = ♀)
-geschlecht_map = {1: "♀", 2: "♂"}
+# Liste der neuen, verkürzten Spaltennamen
+themen_kurz = list(umbenennung.values())
+
+# === 3. Geschlecht umwandeln (1 = ♂, 2 = ♀) ===
+geschlecht_map = {1: "♂", 2: "♀"}
 df["Geschlecht"] = df["Geschlecht"].map(geschlecht_map)
 
-# === 3. Daten umformen für Violinplot ===
+# === 4. Daten umformen für Violinplot ===
 df_melted = df.melt(id_vars="Geschlecht", value_vars=themen_kurz,
                     var_name="Thema", value_name="Bewertung")
 
-# === 4. Violinplot ===
+# === 5. Violinplot erstellen ===
 plt.figure(figsize=(12, 6))
-sns.violinplot(data=df_melted, x="Thema", y="Bewertung", hue="Geschlecht", split=True, inner="quartile")
+sns.violinplot(
+    data=df_melted,
+    x="Thema",
+    y="Bewertung",
+    hue="Geschlecht",
+    split=True,
+    inner="quartile",
+    # palette={"♀": "red", "♂": "lightblue"} 
+)
+
+# === 6. Formatierungen ===
 plt.axhline(0, linestyle="--", color="gray")
-plt.title("Violinplot: Wahrnehmung nach Thema & Geschlecht")
-plt.ylabel("Bewertung (-4 = unterrepräsentiert, +4 = überrepräsentiert)")
+plt.title("Wahrgenommenes Unterrichtsangebot nach Geschlecht")
+plt.ylabel("unterrepräsentiert / überrepräsentiert")
+plt.xlabel("Themen im Physikunterricht")
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
