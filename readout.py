@@ -1,4 +1,9 @@
+import pandas as pd
 import pyreadstat
 
 df, meta = pyreadstat.read_sav("Datensatz_Roman.sav")
-print(df.head())
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+print(df)
